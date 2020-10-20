@@ -1,6 +1,6 @@
 # Hands-on Lab "Terraform it!" Materials
 
-[The Article](https://hades-architect.tk/terraform-it)
+[Text](./terraform-it-slides.pdf)
 
 Values to adjust:
 
