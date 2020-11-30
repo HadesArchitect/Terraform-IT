@@ -3,7 +3,7 @@ resource "digitalocean_droplet" "redis" {
   region   = "ams3"
   size     = "512mb"
   name     = "redis"
-  ssh_keys = ["${digitalocean_ssh_key.default.fingerprint}"]
+  ssh_keys = [digitalocean_ssh_key.default.fingerprint]
   connection {
     user = "core"
   }
@@ -17,7 +17,7 @@ resource "digitalocean_droplet" "voting" {
   image    = "coreos-stable"
   region   = "ams3"
   size     = "512mb"
-  ssh_keys = ["${digitalocean_ssh_key.default.fingerprint}"]
+  ssh_keys = [digitalocean_ssh_key.default.fingerprint]
   name     = "voting"
   connection {
     user = "core"
@@ -32,7 +32,7 @@ resource "digitalocean_droplet" "worker" {
   image    = "coreos-stable"
   region   = "ams3"
   size     = "512mb"
-  ssh_keys = ["${digitalocean_ssh_key.default.fingerprint}"]
+  ssh_keys = [digitalocean_ssh_key.default.fingerprint]
   name     = "redis"
   connection {
     user = "core"
@@ -47,7 +47,7 @@ resource "digitalocean_droplet" "result" {
   image    = "coreos-stable"
   region   = "ams3"
   size     = "512mb"
-  ssh_keys = ["${digitalocean_ssh_key.default.fingerprint}"]
+  ssh_keys = [digitalocean_ssh_key.default.fingerprint]
   name     = "result"
   connection {
     user = "core"
