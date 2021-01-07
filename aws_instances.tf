@@ -13,6 +13,9 @@ resource "aws_instance" "redis" {
       "docker run -dp 6379:6379 redis",
     ]
   }
+  tags = {
+    Name = "redis"
+  }
 }
 resource "aws_instance" "db" {
   ami             = "ami-0e6de310858faf4dc"
@@ -28,6 +31,9 @@ resource "aws_instance" "db" {
     inline = [
       "docker run -dp 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres",
     ]
+  }
+  tags = {
+    Name = "postgresql"
   }
 }
 resource "aws_instance" "voting" {
@@ -45,6 +51,9 @@ resource "aws_instance" "voting" {
       "docker run -dp 80:80 -e REDIS_HOST=${aws_instance.redis.private_ip} ditmc/voting",
     ]
   }
+  tags = {
+    Name = "voting-fe"
+  }
 }
 resource "aws_instance" "worker" {
   ami             = "ami-0e6de310858faf4dc"
@@ -61,6 +70,9 @@ resource "aws_instance" "worker" {
       "docker run -d -e REDIS_HOST=${aws_instance.redis.private_ip} -e DB_HOST=${aws_instance.db.private_ip} ditmc/worker"
     ]
   }
+  tags = {
+    Name = "worker"
+  }
 }
 resource "aws_instance" "result" {
   ami             = "ami-0e6de310858faf4dc"
@@ -76,6 +88,9 @@ resource "aws_instance" "result" {
     inline = [
       "docker run -dp 80:80 -e DB_HOST=${aws_instance.db.private_ip} ditmc/result"
     ]
+  }
+  tags = {
+    Name = "result-fe"
   }
 }
 resource "aws_eip" "voting_ip" {
