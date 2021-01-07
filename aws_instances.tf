@@ -4,8 +4,8 @@ resource "aws_instance" "redis" {
   security_groups = [aws_security_group.ssh.name, aws_security_group.outgoing.name, aws_security_group.redis.name]
   key_name        = aws_key_pair.deployer.key_name
   connection {
-    user = "ec2-user"
-    host = self.public_ip
+    user        = "ec2-user"
+    host        = self.public_ip
     private_key = file("~/.ssh/id_rsa")
   }
   provisioner "remote-exec" {
@@ -20,13 +20,29 @@ resource "aws_instance" "db" {
   security_groups = [aws_security_group.ssh.name, aws_security_group.postgres.name, aws_security_group.outgoing.name]
   key_name        = aws_key_pair.deployer.key_name
   connection {
-    user = "ec2-user"
-    host = self.public_ip
+    user        = "ec2-user"
+    host        = self.public_ip
     private_key = file("~/.ssh/id_rsa")
   }
   provisioner "remote-exec" {
     inline = [
       "docker run -dp 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres",
+    ]
+  }
+}
+resource "aws_instance" "voting" {
+  ami             = "ami-0e6de310858faf4dc"
+  instance_type   = "t2.micro"
+  security_groups = [aws_security_group.ssh.name, aws_security_group.http.name, aws_security_group.outgoing.name]
+  key_name        = aws_key_pair.deployer.key_name
+  connection {
+    user        = "ec2-user"
+    host        = self.public_ip
+    private_key = file("~/.ssh/id_rsa")
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "docker run -dp 80:80 -e REDIS_HOST=${aws_instance.redis.private_ip} ditmc/voting",
     ]
   }
 }
@@ -36,8 +52,8 @@ resource "aws_instance" "worker" {
   security_groups = [aws_security_group.ssh.name, aws_security_group.outgoing.name]
   key_name        = aws_key_pair.deployer.key_name
   connection {
-    user = "ec2-user"
-    host = self.public_ip
+    user        = "ec2-user"
+    host        = self.public_ip
     private_key = file("~/.ssh/id_rsa")
   }
   provisioner "remote-exec" {
@@ -52,8 +68,8 @@ resource "aws_instance" "result" {
   security_groups = [aws_security_group.ssh.name, aws_security_group.http.name, aws_security_group.outgoing.name]
   key_name        = aws_key_pair.deployer.key_name
   connection {
-    user = "ec2-user"
-    host = self.public_ip
+    user        = "ec2-user"
+    host        = self.public_ip
     private_key = file("~/.ssh/id_rsa")
   }
   provisioner "remote-exec" {
@@ -62,7 +78,9 @@ resource "aws_instance" "result" {
     ]
   }
 }
-
+resource "aws_eip" "voting_ip" {
+  instance = aws_instance.voting.id
+}
 resource "aws_eip" "db_ip" {
   instance = aws_instance.db.id
 }
@@ -73,4 +91,7 @@ resource "aws_eip" "result_ip" {
 
 output "aws_result_ip" {
   value = aws_eip.result_ip.public_ip
+}
+output "aws_voting_ip" {
+  value = aws_eip.voting_ip.public_ip
 }
